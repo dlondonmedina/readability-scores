@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "readability-scores"
+version = "0.1.0"
+description = ""
+authors = ["dylangotlearning <dylan@gotlearning.com>"]
+readme = "README.md"
+packages = [{include = "readability_scores"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
