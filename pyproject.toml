@@ -8,6 +8,8 @@ packages = [{include = "readability_scores"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+spacy = "3.7.5"
+pyphen = "^0.16.0"
 
 
 [build-system]
