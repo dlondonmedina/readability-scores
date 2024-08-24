@@ -25,7 +25,7 @@ class ReadabilityScorer:
         >>> print(doc._.smog)
         >>> print(doc._.coleman_liau_index)
         >>> print(doc._.automated_readability_index)
-        >>> print(doc._.forcast)
+        >>> print(doc._.forecast)
     """
 
     def __init__(self, nlp: Language):
@@ -62,12 +62,39 @@ class ReadabilityScorer:
         return doc
 
     def _get_num_sentences(self, doc: Doc) -> int:
+        """
+        Returns the number of sentences in the given document.
+
+        Parameters:
+            doc (Doc): The document to count the sentences in.
+
+        Returns:
+            int: The number of sentences in the document.
+        """
         return len(list(doc.sents))
 
     def _get_num_words(self, doc: Doc) -> int:
-        return len(doc)
+        """
+        Calculate the number of words in a given document.
+
+        Parameters:
+        - doc (Doc): The document to calculate the number of words for.
+
+        Returns:
+        - int: The number of words in the document.
+        """
+        return len(list(filter(lambda x: not x.is_punct, doc)))
 
     def _get_num_syllables(self, token: Token) -> int:
+        """
+        Calculates the number of syllables in a given token.
+
+        Args:
+            token (Token): The token for which to calculate the number of syllables.
+
+        Returns:
+            int: The number of syllables in the token.
+        """
         # Not a word in the spacy vocabulary
         if token.is_oov:
             return 0
@@ -84,11 +111,21 @@ class ReadabilityScorer:
 
         # Use Regex looking for vowel groups
         # to handle cases like "amen" where pyphen doesn't hyphenate.
-        pattern = r"[aeiouáéíóúãõâêôûà]+"
+        pattern = r"[aeiouáéíóúãõâêôûàAEIOU]+"
         matches = re.findall(pattern, token.text)
         return len(matches)
 
     def fk_grade(self, doc):
+        """
+        Calculates the Flesch-Kincaid Grade Level of a document.
+
+        Parameters:
+            doc (str): The document to be analyzed.
+
+        Returns:
+            float: The Flesch-Kincaid Grade Level score of the document.
+        """
+
         num_sents = self._get_num_sentences(doc)
         num_words = self._get_num_words(doc)
         num_syllables = sum(self._get_num_syllables(token) for token in doc)
@@ -101,6 +138,15 @@ class ReadabilityScorer:
         )
 
     def fk_ease(self, doc):
+        """
+        Calculates the Flesch-Kincaid Ease score for a given document.
+
+        Parameters:
+        - doc: The document to calculate the score for.
+
+        Returns:
+        - The Flesch-Kincaid Ease score for the document.
+        """
         num_sents = self._get_num_sentences(doc)
         num_words = self._get_num_words(doc)
         num_syllables = sum(self._get_num_syllables(token) for token in doc)
@@ -113,6 +159,15 @@ class ReadabilityScorer:
         return 206.835 - (1.015 * words_per_sent) - (84.6 * syllables_per_word)
 
     def dale_chall(self, doc):
+        """
+        Calculate the Dale-Chall readability score for a given document.
+
+        Parameters:
+        - doc (spacy.tokens.doc.Doc): The document to calculate the readability score for.
+
+        Returns:
+        - float: The Dale-Chall readability score for the document.
+        """
         num_sents = self._get_num_sentences(doc)
         num_words = self._get_num_words(doc)
         if num_sents == 0 or num_words == 0:
@@ -139,7 +194,7 @@ class ReadabilityScorer:
         num_sents = self._get_num_sentences(doc)
         num_words = self._get_num_words(doc)
         if num_sents < 30 or num_words == 0:
-            return -1
+            return 0
         num_poly = sum(
             list(
                 filter(
@@ -150,6 +205,19 @@ class ReadabilityScorer:
         return 1.0430 * sqrt(num_poly * 30 / num_sents) + 3.1291
 
     def coleman_liau(self, doc):
+        """
+        Calculate the Coleman-Liau readability score for a given document.
+
+        Parameters:
+        - doc (str): The document to calculate the readability score for.
+
+        Returns:
+        - float: The Coleman-Liau readability score.
+
+        Raises:
+        - None
+
+        """
         num_words = self._get_num_words(doc)
         if num_words <= 0:
             return 0
@@ -170,6 +238,15 @@ class ReadabilityScorer:
         )
 
     def ari(self, doc):
+        """
+        Calculates the Automated Readability Index (ARI) of a given document.
+
+        Parameters:
+        - doc (str): The document to calculate the ARI for.
+
+        Returns:
+        - float: The ARI score of the document.
+        """
         num_sents = self._get_num_sentences(doc)
         num_words = self._get_num_words(doc)
 
@@ -181,7 +258,21 @@ class ReadabilityScorer:
         words_per_sentence = num_words / num_sents
         return 4.71 * letters_per_word + 0.5 * words_per_sentence - 21.43
 
-    def forecast(self, doc):
+    def forcast(self, doc):
+        """
+        Calculates the forcast readability score for a given document.
+
+        Parameters:
+        - doc (list): A list of tokens representing the document.
+
+        Returns:
+        - float: The forecast readability score.
+
+        The forecast readability score is calculated based on the number of words in the document.
+        If the number of words is less than 150, the score is 0.
+        Otherwise, the score is calculated by counting the number of monosyllabic words in the first 150 tokens of the document,
+        and subtracting the result divided by 10 from 20.
+        """
         num_words = self._get_num_words(doc)
 
         if num_words < 150:
@@ -200,4 +291,14 @@ class ReadabilityScorer:
 
 @Language.factory("readability")
 def create_readability_component(nlp: Language, name: str) -> ReadabilityScorer:
+    """
+    Create a readability component.
+
+    Args:
+        nlp (Language): The spaCy language object.
+        name (str): The name of the component.
+
+    Returns:
+        ReadabilityScorer: The readability scorer component.
+    """
     return ReadabilityScorer(nlp)

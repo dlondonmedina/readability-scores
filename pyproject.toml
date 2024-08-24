@@ -12,6 +12,10 @@ spacy = "3.7.5"
 pyphen = "^0.16.0"
 
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+ftfy = "^6.2.3"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

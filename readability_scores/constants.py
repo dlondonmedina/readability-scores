@@ -1,4 +1,4 @@
-DALE_CHALL_WORDS = set(
+DALE_CHALL_WORDS = {
     "a",
     "able",
     "aboard",
@@ -2949,4 +2949,4 @@ DALE_CHALL_WORDS = set(
     "yourselves",
     "youth",
     "you've",
-)
+}
